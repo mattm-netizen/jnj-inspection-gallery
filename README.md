@@ -11,3 +11,4 @@ Public inspection photo gallery for PDI (Pre-Delivery Inspection) and RDI (Retur
 
 This project is deployed on Vercel and fetches photos from:
 `https://rentalpro.jnjequipmentrental.com/api/public/inspection/`
+
