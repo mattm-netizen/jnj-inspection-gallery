@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J&J Equipment Rental - Inspection Photos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -80,11 +82,123 @@
             line-height: 1.6;
         }
 
+        .no-photos {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .no-photos h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .no-photos p {
+            color: #666;
+        }
+
+        .inspection-section {
+            margin-bottom: 50px;
+        }
+
+        .section-header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-info h2 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .section-info p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .download-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .download-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .download-all-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .download-all-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-all-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .download-all-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 20px;
         }
 
         .photo-card {
@@ -114,54 +228,35 @@
 
         .photo-info h3 {
             color: #333;
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin-bottom: 5px;
         }
 
         .photo-info p {
             color: #666;
             font-size: 0.9rem;
+            word-break: break-word;
         }
 
-        .no-photos {
-            background: white;
-            border-radius: 12px;
-            padding: 60px 30px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
-        .no-photos h2 {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .no-photos p {
-            color: #999;
-        }
-
-        /* Disclaimer */
         .disclaimer {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 40px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
         .disclaimer h3 {
             color: #333;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
         }
 
         .disclaimer p {
             color: #666;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 1rem;
         }
 
         /* Lightbox */
@@ -172,11 +267,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.9);
             z-index: 1000;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
+            align-items: center;
         }
 
         .lightbox.active {
@@ -187,16 +281,14 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
-            border-radius: 8px;
         }
 
         .lightbox-close {
             position: absolute;
-            top: 20px;
-            right: 30px;
+            top: 30px;
+            right: 40px;
+            font-size: 50px;
             color: white;
-            font-size: 40px;
-            font-weight: bold;
             cursor: pointer;
             z-index: 1001;
         }
@@ -212,6 +304,15 @@
 
             .header p {
                 font-size: 1rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-info h2 {
+                font-size: 1.4rem;
             }
 
             .photo-grid {
@@ -249,6 +350,8 @@
         const invoiceNumber = urlParams.get('invoice');
         const API_BASE = 'https://rentalpro.jnjequipmentrental.com/api/public/inspection';
 
+        let allPhotos = [];
+
         // Update subtitle based on type
         if (contractNumber) {
             document.getElementById('subtitle').textContent = `Pre-Delivery Inspection - Contract ${contractNumber}`;
@@ -277,9 +380,9 @@
                 }
 
                 const data = await response.json();
-                const photos = data.photos || [];
+                allPhotos = data.photos || [];
 
-                if (photos.length === 0) {
+                if (allPhotos.length === 0) {
                     content.innerHTML = `
                         <div class="no-photos">
                             <h2>No Photos Available</h2>
@@ -289,28 +392,48 @@
                     return;
                 }
 
-                // Create photo grid
-                const grid = document.createElement('div');
-                grid.className = 'photo-grid';
-
-                photos.forEach((photo, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'photo-card';
-                    card.onclick = () => openLightbox(photo.url);
-
-                    card.innerHTML = `
-                        <img src="${photo.url}" alt="${photo.filename}" loading="lazy">
-                        <div class="photo-info">
-                            <h3>Photo ${index + 1}</h3>
-                            <p>${photo.filename}</p>
-                        </div>
-                    `;
-
-                    grid.appendChild(card);
-                });
+                // Separate photos by inspection type
+                const pdiPhotos = allPhotos.filter(p => p.inspection_type === 'PDI');
+                const rdiPhotos = allPhotos.filter(p => p.inspection_type === 'RDI');
 
                 content.innerHTML = '';
-                content.appendChild(grid);
+
+                // Add download all button if both types exist
+                if (pdiPhotos.length > 0 && rdiPhotos.length > 0) {
+                    const downloadAllContainer = document.createElement('div');
+                    downloadAllContainer.className = 'download-all-container';
+                    downloadAllContainer.innerHTML = `
+                        <button class="download-all-btn" onclick="downloadAllPhotos()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Download All Photos (${allPhotos.length} total)
+                        </button>
+                    `;
+                    content.appendChild(downloadAllContainer);
+                }
+
+                // Create PDI section
+                if (pdiPhotos.length > 0) {
+                    const pdiSection = createInspectionSection(
+                        'Pre-Delivery Inspection (PDI)',
+                        'Equipment condition before rental',
+                        pdiPhotos,
+                        'PDI'
+                    );
+                    content.appendChild(pdiSection);
+                }
+
+                // Create RDI section
+                if (rdiPhotos.length > 0) {
+                    const rdiSection = createInspectionSection(
+                        'Return Delivery Inspection (RDI)',
+                        'Equipment condition after rental',
+                        rdiPhotos,
+                        'RDI'
+                    );
+                    content.appendChild(rdiSection);
+                }
 
                 // Add disclaimer
                 const disclaimer = document.createElement('div');
@@ -338,6 +461,133 @@
             }
         }
 
+        // Create inspection section with photos
+        function createInspectionSection(title, description, photos, type) {
+            const section = document.createElement('div');
+            section.className = 'inspection-section';
+
+            const header = document.createElement('div');
+            header.className = 'section-header';
+            header.innerHTML = `
+                <div class="section-info">
+                    <h2>${title}</h2>
+                    <p>${description} • ${photos.length} photo${photos.length !== 1 ? 's' : ''}</p>
+                </div>
+                <button class="download-btn" onclick="downloadSectionPhotos('${type}')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download ${type} Photos
+                </button>
+            `;
+            section.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'photo-grid';
+
+            photos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.onclick = () => openLightbox(photo.url);
+
+                card.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.filename}" loading="lazy">
+                    <div class="photo-info">
+                        <h3>Photo ${index + 1}</h3>
+                        <p>${photo.filename}</p>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            return section;
+        }
+
+        // Download section photos (PDI or RDI)
+        async function downloadSectionPhotos(type) {
+            const photos = allPhotos.filter(p => p.inspection_type === type);
+            const docNumber = contractNumber || invoiceNumber;
+            const zip = new JSZip();
+            const folder = zip.folder(type);
+
+            try {
+                // Disable button
+                event.target.disabled = true;
+                event.target.textContent = `Downloading ${type} Photos...`;
+
+                // Fetch and add each photo to ZIP
+                for (let i = 0; i < photos.length; i++) {
+                    const photo = photos[i];
+                    const response = await fetch(photo.url);
+                    const blob = await response.blob();
+                    folder.file(photo.filename, blob);
+                }
+
+                // Generate and download ZIP
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, `${docNumber}_${type}_Photos.zip`);
+
+                // Re-enable button
+                event.target.disabled = false;
+                event.target.innerHTML = `
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download ${type} Photos
+                `;
+            } catch (error) {
+                console.error('Error downloading photos:', error);
+                alert('Failed to download photos. Please try again.');
+                event.target.disabled = false;
+            }
+        }
+
+        // Download all photos
+        async function downloadAllPhotos() {
+            const docNumber = contractNumber || invoiceNumber;
+            const zip = new JSZip();
+            const pdiFolder = zip.folder('PDI');
+            const rdiFolder = zip.folder('RDI');
+
+            try {
+                // Disable button
+                event.target.disabled = true;
+                event.target.textContent = 'Downloading All Photos...';
+
+                // Fetch and add each photo to appropriate folder
+                for (let i = 0; i < allPhotos.length; i++) {
+                    const photo = allPhotos[i];
+                    const response = await fetch(photo.url);
+                    const blob = await response.blob();
+                    
+                    if (photo.inspection_type === 'PDI') {
+                        pdiFolder.file(photo.filename, blob);
+                    } else {
+                        rdiFolder.file(photo.filename, blob);
+                    }
+                }
+
+                // Generate and download ZIP
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, `${docNumber}_All_Inspection_Photos.zip`);
+
+                // Re-enable button
+                event.target.disabled = false;
+                event.target.innerHTML = `
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download All Photos (${allPhotos.length} total)
+                `;
+            } catch (error) {
+                console.error('Error downloading photos:', error);
+                alert('Failed to download photos. Please try again.');
+                event.target.disabled = false;
+            }
+        }
+
         // Lightbox functions
         function openLightbox(imageUrl) {
             document.getElementById('lightbox-img').src = imageUrl;
@@ -351,13 +601,6 @@
         // Close lightbox on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                closeLightbox();
-            }
-        });
-
-        // Close lightbox on background click
-        document.getElementById('lightbox').addEventListener('click', (e) => {
-            if (e.target.id === 'lightbox') {
                 closeLightbox();
             }
         });
