@@ -140,6 +140,30 @@
             color: #999;
         }
 
+        /* Disclaimer */
+        .disclaimer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .disclaimer h3 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .disclaimer p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
         /* Lightbox */
         .lightbox {
             display: none;
@@ -229,7 +253,7 @@
         if (contractNumber) {
             document.getElementById('subtitle').textContent = `Pre-Delivery Inspection - Contract ${contractNumber}`;
         } else if (invoiceNumber) {
-            document.getElementById('subtitle').textContent = `Return Delivery Inspection - Invoice ${invoiceNumber}`;
+            document.getElementById('subtitle').textContent = `Pre-Delivery & Return Delivery Inspection - Invoice ${invoiceNumber}`;
         }
 
         // Fetch and display photos
@@ -287,6 +311,20 @@
 
                 content.innerHTML = '';
                 content.appendChild(grid);
+
+                // Add disclaimer
+                const disclaimer = document.createElement('div');
+                disclaimer.className = 'disclaimer';
+                disclaimer.innerHTML = `
+                    <h3>Important Notice</h3>
+                    <p>
+                        These inspection photographs are the exclusive property of J&J Equipment Rental and are provided 
+                        solely as reference documentation of equipment condition before and after rental. Images are intended 
+                        for verification and comparison purposes only. All photographs will remain accessible for download 
+                        for a period of 90 days from the date of upload, after which they will be permanently removed from our system.
+                    </p>
+                `;
+                content.appendChild(disclaimer);
 
             } catch (error) {
                 console.error('Error loading photos:', error);
