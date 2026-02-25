@@ -287,8 +287,8 @@
 
       try {
         const endpoint = invoiceNumber 
-          ? `${API_BASE}/public-inspection?invoice=${invoiceNumber}`
-          : `${API_BASE}/public-inspection?contract=${contractNumber}`;
+          ? `${API_BASE}/public/inspection/invoice/${invoiceNumber}`
+          : `${API_BASE}/public/inspection/contract/${contractNumber}`;
 
         const response = await fetch(endpoint);
         
